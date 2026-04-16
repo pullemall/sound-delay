@@ -155,7 +155,10 @@ def plot_signals(
     red_intensity: np.ndarray,
     output_image_path: Path,
     flash_time: Optional[float] = None,
-    boom_time: Optional[float] = None
+    boom_time: Optional[float] = None,
+    temperature: Optional[float] = None,
+    distance: Optional[float] = None,
+    error: Optional[float] = None
 ) -> None:
     """Rescale signals and plot them together, saving to file and displaying."""
     # Rescale red intensity amplitude to match audio signal amplitude
@@ -187,6 +190,14 @@ def plot_signals(
         ax.axvline(x=flash_time, color='r', linestyle='--', alpha=0.7, label=f"Flash ({flash_time:.2f}s)")
     if boom_time is not None:
         ax.axvline(x=boom_time, color='b', linestyle='--', alpha=0.7, label=f"Boom ({boom_time:.2f}s)")
+
+    if all(v is not None for v in [flash_time, boom_time, temperature, distance, error]):
+        speed_of_sound = 331 + 0.6 * temperature
+        dist_text = (
+            f"( {boom_time:.2f} - {flash_time:.2f} ) [s] * {speed_of_sound:.0f} [m/s] @ {temperature:.0f} [deg C]\n"
+            f"  = {distance:.0f} +/- {error:.0f} meters"
+        )
+        ax.set_title(dist_text)
 
     ax.legend(loc="upper right")
     
@@ -240,7 +251,7 @@ def main() -> None:
 
     # 6. Plot Signals
     output_image_path = video_path.with_suffix(".png")
-    plot_signals(time_audio, loudness, time_video, red_intensity, output_image_path, flash_time, boom_time)
+    plot_signals(time_audio, loudness, time_video, red_intensity, output_image_path, flash_time, boom_time, temperature, distance, error)
 
 
 if __name__ == "__main__":
